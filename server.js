@@ -27,23 +27,209 @@ let db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
 
 // GET request handler for crime codes
 app.get('/codes', (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
+    // console.log(req.query); // query object (key-value pairs after the ? in the url)
+    // console.log(Object.entries(req.query).length); // query object (key-value pairs after the ? in the url)
     
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    let query = 'SELECT * FROM Codes ORDER BY code ASC';
+    if(Object.entries(req.query).length == 0) {
+        databaseSelect(query)
+            .then((rows) => {
+                // console.log(rows);
+                res.status(200).type('json').send(rows); 
+            })
+            .catch((err) => {
+                console.log('ERROR: ' + err);
+                // res.status(404).type('text').send('Error: ' + err); 
+            });
+    } else {
+        let codes = req.query.code.split(',');
+        console.log(codes);
+        query = 'SELECT * FROM Codes WHERE code = ?';
+
+        for(let i = 1; i < codes.length; i++) {
+            query += ' OR code = ?';
+        }
+
+        query += ' ORDER BY code ASC';
+
+        // console.log('LONG QUERY: ' + query);
+
+        databaseSelect(query,codes)
+            .then((rows) => {
+                // console.log(rows);
+                res.status(200).type('json').send(rows); 
+            })
+            .catch((err) => {
+                console.log('ERROR: ' + err);
+                // res.status(404).type('text').send('Error: ' + err); 
+            });
+    }
 });
 
 // GET request handler for neighborhoods
 app.get('/neighborhoods', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
+
+    let query = 'SELECT * FROM Neighborhoods ORDER BY neighborhood_number ASC';
+    if(Object.entries(req.query).length == 0) {
+        databaseSelect(query)
+            .then((rows) => {
+                res.status(200).type('json').send(rows);
+            })
+            .catch((err) => {
+                console.log('ERROR: ' + err);
+                // res.status(404).type('text').send('Error: ' + err); 
+            })
+    } else {
+        let neighborhoods = req.query.id.split(',');
+        query = 'SELECT * FROM Neighborhoods WHERE neighborhood_number = ?';
+
+        for(let i = 1; i < neighborhoods.length; i++) {
+            query += ' OR neighborhood_number = ?';
+        }
+
+        query += ' ORDER BY neighborhood_number ASC';
+
+        // console.log('LONG QUERY: ' + query);
+
+        databaseSelect(query,neighborhoods)
+            .then((rows) => {
+                // console.log(rows);
+                res.status(200).type('json').send(rows); 
+            })
+            .catch((err) => {
+                console.log('ERROR: ' + err);
+                // res.status(404).type('text').send('Error: ' + err); 
+            });
+    }
     
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    // res.status(200).type('json').send({}); // <-- you will need to change this
 });
 
 // GET request handler for crime incidents
 app.get('/incidents', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
     
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    let query = 'SELECT * FROM Incidents ORDER BY date_time DESC LIMIT 1000';
+    if(Object.entries(req.query).length == 0) {
+        databaseSelect(query)
+            .then((rows) => {
+                res.status(200).type('json').send(rows);
+            })
+            .catch((err) => {
+                console.log('ERROR: ' + err);
+                // res.status(404).type('text').send('Error: ' + err); 
+            })
+    } else {
+        let first = true;
+        let params =[];
+        console.log(req.query);
+        
+        let query = 'SELECT * FROM Incidents';
+        if(req.query.hasOwnProperty('start_date')) {
+            params.push(req.query.start_date);
+            if(first) {
+                query += ' WHERE date(date_time) >= ?'
+                first = false;
+            } else {
+                query += ' AND date(date_time) >= ?'
+            }
+        }
+        if(req.query.hasOwnProperty('end_date')) {
+            params.push(req.query.end_date);
+            if(first) {
+                query += ' WHERE date(date_time) <= ?'
+                first = false;
+            } else {
+                query += ' AND date(date_time) <= ?'
+            }
+        }
+        if(req.query.hasOwnProperty('code')) {
+            let firstCode = true;
+            let codes = req.query.code.split(',');
+            console.log('CODES:');
+            console.log(codes);
+            for(let i = 0 ; i < codes.length; i++) {
+                params.push(codes[i]);
+                if(firstCode) {
+                    if(first) {
+                        query += ' WHERE code IN (?';
+                        first = false;
+                        firstCode = false;
+                    } else {
+                        query += ' AND code IN (?';
+                        firstCode = false;
+                    }
+                } else {
+                    query += ', ?';
+                }
+            }
+            query += ')';
+        }
+        if(req.query.hasOwnProperty('grid')) {
+            let firstGrid = true;
+            let grids = req.query.grid.split(',');
+            console.log('GRIDS:');
+            console.log(grids);
+            for(let i = 0 ; i < grids.length; i++) {
+                params.push(grids[i]);
+                if(firstGrid) {
+                    if(first) {
+                        query += ' WHERE police_grid IN (?';
+                        first = false;
+                        firstGrid = false;
+                    } else {
+                        query += ' AND police_grid IN (?';
+                        firstGrid = false;
+                    }
+                } else {
+                    query += ', ?';
+                }
+            }
+            query += ')';
+        }
+        if(req.query.hasOwnProperty('neighborhood')) {
+            let firstNeighborhood = true;
+            let neighborhoods = req.query.neighborhood.split(',');
+            console.log('Neighborhoods:');
+            console.log(neighborhoods);
+            for(let i = 0 ; i < neighborhoods.length; i++) {
+                params.push(neighborhoods[i]);
+                if(firstNeighborhood) {
+                    if(first) {
+                        query += ' WHERE neighborhood_number IN (?';
+                        first = false;
+                        firstNeighborhood = false;
+                    } else {
+                        query += ' AND neighborhood_number IN (?';
+                        firstNeighborhood = false;
+                    }
+                } else {
+                    query += ', ?';
+                }
+            }
+            query += ')';
+        }
+        console.log('  ' + params);
+        query += ' ORDER BY date_time DESC';
+        if(req.query.hasOwnProperty('limit')) {
+            params.push(req.query.limit);
+            query += ' LIMIT ?'
+        }
+        console.log(query);
+        databaseSelect(query, params)
+            .then((rows) => {
+                console.log(rows);
+                console.log(query);
+                res.status(200).type('json').send(rows); 
+            })
+            .catch((err) => {
+                console.log(err);
+                res.status(400).type('text').send('ERROR: ' + err); 
+            })
+    }
+
+    // res.status(200).type('json').send({}); // <-- you will need to change this
 });
 
 // PUT request handler for new crime incident
