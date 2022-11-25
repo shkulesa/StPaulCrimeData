@@ -43,7 +43,7 @@ app.get('/codes', (req, res) => {
             });
     } else {
         let codes = req.query.code.split(',');
-        console.log(codes);
+        // console.log(codes);
         query = 'SELECT * FROM Codes WHERE code = ?';
 
         for(let i = 1; i < codes.length; i++) {
@@ -68,7 +68,7 @@ app.get('/codes', (req, res) => {
 
 // GET request handler for neighborhoods
 app.get('/neighborhoods', (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
+    // console.log(req.query); // query object (key-value pairs after the ? in the url)
 
     let query = 'SELECT * FROM Neighborhoods ORDER BY neighborhood_number ASC';
     if(Object.entries(req.query).length == 0) {
@@ -98,8 +98,8 @@ app.get('/neighborhoods', (req, res) => {
                 res.status(200).type('json').send(rows); 
             })
             .catch((err) => {
-                console.log('ERROR: ' + err);
-                // res.status(500).type('text').send('Error: ' + err); 
+                // console.log('ERROR: ' + err);
+                res.status(500).type('text').send('Error: ' + err); 
             });
     }
     
@@ -108,7 +108,7 @@ app.get('/neighborhoods', (req, res) => {
 
 // GET request handler for crime incidents
 app.get('/incidents', (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
+    // console.log(req.query); // query object (key-value pairs after the ? in the url)
     
     let query = 'SELECT * FROM Incidents ORDER BY date_time DESC LIMIT 1000';
     if(Object.entries(req.query).length == 0) {
