@@ -234,18 +234,56 @@ app.get('/incidents', (req, res) => {
 
 // PUT request handler for new crime incident
 app.put('/new-incident', (req, res) => {
-    console.log(req.body); // uploaded data
-    
-    res.status(200).type('txt').send('OK'); // <-- you may need to change this
+    databaseSelect('SELECT * FROM Incidents WHERE case_number = ?', req.body.case_number)
+        .then((rows) => {
+            if (rows.length > 0) {
+                res.status(500).type('text').send('The case number already exists');
+            } else {
+                var {
+                    case_number,
+                    date,
+                    time,
+                    code,
+                    incident,
+                    police_grid,
+                    neighborhood_number,
+                    block
+                } = req.body;
+                var insertQuery = 'INSERT INTO Incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES (?, ?, ?, ?, ?, ?, ?);'
+                databaseRun(insertQuery, [case_number, date + time, code, incident, police_grid, neighborhood_number, block])
+                    .then(() => {
+                        res.status(200).type('text').send('Uploaded successfully');
+                    })
+                    .catch((err) => {
+                        res.status(400).type('text').send('ERROR: ' + err);
+                    })
+            }
+        })
+        .catch((err) => {
+            res.status(400).type('text').send('ERROR: ' + err);
+        })
 });
 
 // DELETE request handler for new crime incident
 app.delete('/remove-incident', (req, res) => {
-    console.log(req.body); // uploaded data
-    
-    res.status(200).type('txt').send('OK'); // <-- you may need to change this
+    databaseSelect('SELECT * FROM Incidents WHERE case_number = ?', req.body.case_number)
+        .then((rows) => {
+            if (rows.length === 0) {
+                res.status(500).type('text').send('The case number does not exist');
+            } else {
+                databaseRun('DELETE FROM Incidents WHERE case_number = ?', req.body.case_number)
+                    .then(() => {
+                        res.status(200).type('text').send('Deleted successfully');
+                    })
+                    .catch((err) => {
+                        res.status(400).type('text').send('ERROR: ' + err);
+                    })
+            }
+        })
+        .catch((err) => {
+            res.status(400).type('text').send('ERROR: ' + err);
+        })
 });
-
 
 // Create Promise for SQLite3 database SELECT query 
 function databaseSelect(query, params) {
