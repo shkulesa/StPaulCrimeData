@@ -1,32 +1,36 @@
 {
-    "name": "restful-server",
-    "version": "0.0.0",
-    "description": "RESTful API Server using Node JS",
-    "author": {
-        "name": "Sam Kulesa",
-        "email": "kule2623@stthomas.edu"
+  "name": "stpaul-crime",
+  "version": "1.0.0",
+  "description": "RESTful Web Server and Single Page Application",
+  "author": {
+    "name": "",
+    "email": ""
+  },
+  "contributors": [
+    {
+      "name": "",
+      "email": ""
     },
-    "contributors": [
-        {
-            "name": "Sam Kulesa",
-            "email": "kule2623@stthomas.edu"
-        },
-        {
-            "name": "Chris Roon",
-            "email": "roon4169@stthomas.edu"
-        },
-        {
-            "name": "Hieu Le",
-            "email": "le009660@stthomas.edu"
-        }
-    ],
-    "main": "server.js",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/shkulesa/Project3"
-    },
-    "dependencies": {
-        "express": "^4.18.2",
-        "sqlite3": "^5.1.2"
+    {
+      "name": "",
+      "email": ""
     }
+  ],
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "jquery": "^3.6.1",
+    "vue": "^3.2.45"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^3.2.0",
+    "vite": "^3.2.4"
+  }
 }
