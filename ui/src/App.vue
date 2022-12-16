@@ -191,11 +191,11 @@ export default {
     </div>
     <div v-if="view === 'new_incident'">
         <!-- Replace this with your actual form: can be done here or by making a new component -->
+        <div class="grid-x grid-padding-x">
+            <h1 class="cell auto">Submit a new Incident</h1>
+        </div>
         <IncidentForm />
         <div class="grid-container">
-            <div class="grid-x grid-padding-x">
-                <h1 class="cell auto">New Incident Form</h1>
-            </div>
         </div>
     </div>
     <div v-if="view === 'about'">
