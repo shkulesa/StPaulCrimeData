@@ -1,7 +1,9 @@
 <script>
 import $ from 'jquery'
+import IncidentForm from './components/IncidentForm.vue'
 
 export default {
+    components: { IncidentForm },
     data() {
         return {
             view: 'map',
@@ -189,6 +191,7 @@ export default {
     </div>
     <div v-if="view === 'new_incident'">
         <!-- Replace this with your actual form: can be done here or by making a new component -->
+        <IncidentForm />
         <div class="grid-container">
             <div class="grid-x grid-padding-x">
                 <h1 class="cell auto">New Incident Form</h1>
