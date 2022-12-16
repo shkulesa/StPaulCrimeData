@@ -90,12 +90,12 @@ export default {
             });
         },
         clearMarkers() {
-            $(".leaflet-marker-icon").remove(); 
+            $('.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive:not(".huechange")').remove();
             $(".leaflet-popup").remove();
-            $(".leaflet-pane.leaflet-shadow-pane").remove();
+            // $(".leaflet-pane.leaflet-shadow-pane").remove();
         },
-        isInBoundingBox(lat, lon, x1, x2, y1, y2) {
-            return lat >= x1 && lat <= x2 && lon >= y1 && lon <= y2;
+        isInBoundingBox(lat, lon) {
+            return lat >= this.leaflet.bounds.se.lat && lat <= this.leaflet.bounds.nw.lat && lon >= this.leaflet.bounds.nw.lng && lon <= this.leaflet.bounds.se.lng;
         },
         onInput(e) {
             this.currentAddress = e.target.value;
@@ -104,7 +104,7 @@ export default {
             this.inputError = false;
             this.getJSON(`https://nominatim.openstreetmap.org/search?q=${encodeURI(this.currentAddress)}&format=json`).then((result) => {
                 const {lat, lon} = result[0];
-                if(this.isInBoundingBox(lat, lon, this.leaflet.bounds.se.lat, this.leaflet.bounds.nw.lat, this.leaflet.bounds.nw.lng, this.leaflet.bounds.se.lng)) {
+                if(this.isInBoundingBox(lat, lon)) {
                     this.clearMarkers();
                     this.currentMarker = L.marker([lat, lon]).addTo(this.leaflet.map);
                     this.leaflet.map.panTo([lat, lon]);
@@ -151,6 +151,14 @@ export default {
         }).catch((error) => {
             console.log('Error:', error);
         });
+        
+        this.leaflet.neighborhood_markers.forEach((neighborhood) => {
+            neighborhood.marker = L.marker(neighborhood.location).addTo(this.leaflet.map);
+            neighborhood.marker._icon.classList.add("huechange");
+        })
+
+        $(".leaflet-pane.leaflet-shadow-pane").remove();
+
     }
 }
 </script>
@@ -223,5 +231,8 @@ export default {
     border: solid 1px white;
     text-align: center;
     cursor: pointer;
+}
+img.huechange { 
+    filter: hue-rotate(120deg); 
 }
 </style>
