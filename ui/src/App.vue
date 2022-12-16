@@ -6,10 +6,25 @@ export default {
         return {
             view: 'map',
             codes: [],
-            neighborhoods: {1:'Conway/Battlecreek/Highwood',2:'Greater East Side', 3:'West Side', 4:'Daytons Bluff',
-        5:'Payne/Phalen',6:'North End',7:'Thomas/Dale(Frogtown)', 8:'Summit/University', 9:'West Seventh', 10:'Como', 
-        11:'Hamline/Midway', 12:'St. Anthony', 13:'Union Park', 14:'Macalester-Groveland', 15:'Highland', 
-        16:'Summit Hill', 17:'Capitol River'},
+            neighborhoods: {
+                1: {name: 'Conway/Battlecreek/Highwood', loc: [44.942068, -93.020521]},
+                2: {name: 'Greater East Side', loc: [44.977413, -93.025156]},
+                3: {name: 'West Side', loc: [44.931244, -93.079578]},
+                4: {name: 'Daytons Bluff', loc: [44.956192, -93.060189]},
+                5: {name: 'Payne/Phalen', loc: [44.978883, -93.068163]},
+                6: {name: 'North End', loc: [44.975766, -93.113887]},
+                7: {name: 'Thomas/Dale(Frogtown)', loc: [44.959639, -93.121271]},
+                8: {name: 'Summit/University', loc: [44.947700, -93.128505]},
+                9: {name: 'West Seventh', loc: [44.930276, -93.119911]},
+                10: {name: 'Como', loc: [44.982752, -93.147910]},
+                11: {name: 'Hamline/Midway', loc: [44.963631, -93.167548]},
+                12: {name: 'St. Anthony', loc: [44.973971, -93.197965]},
+                13: {name: 'Union Park', loc: [44.949043, -93.178261]},
+                14: {name: 'Macalester-Groveland', loc: [44.934848, -93.176736]},
+                15: {name: 'Highland', loc: [44.913106, -93.170779]},
+                16: {name: 'Summit Hill', loc:[44.937705, -93.136997]},
+                17: {name: 'Capitol River', loc:[44.949203, -93.093739]}
+            },
             incidents: [],
             leaflet: {
                 map: null,
@@ -102,10 +117,12 @@ export default {
             return lat >= this.leaflet.bounds.se.lat && lat <= this.leaflet.bounds.nw.lat && lon >= this.leaflet.bounds.nw.lng && lon <= this.leaflet.bounds.se.lng;
         },
         isInBounds(lat, lon, currentBounds) {
-            console.log(currentBounds);
-            let se = currentBounds._southWest
-            let nw = currentBounds._northEast
-            return lat >= se.lat && lat <= nw.lat && lon >= se.lng && lon <= nw.lng;
+            var ne = currentBounds._northEast;
+            var sw = currentBounds._southWest;
+            return lat >= sw.lat && lat <= ne.lat && lon >= sw.lng && lon <= ne.lng;
+        },
+        isNeighborhoodVisible() {
+            
         },
         onInput(e) {
             this.currentAddress = e.target.value;
@@ -130,19 +147,15 @@ export default {
             const currentCenter = this.leaflet.map.getCenter().lat + ',' + this.leaflet.map.getCenter().lng;
             this.getJSON('https://nominatim.openstreetmap.org/search?q=' + currentCenter + '&format=json').then((result) => {
                 this.currentAddress = result[0].display_name;
-                this.currentBoundingBox = this.leaflet.map.getBounds();
             }).catch((error) => {
                 console.log(error);
             });
             this.getJSON('http://localhost:8000/incidents').then((results) => {
-            // crime data
             results.sort((inc1,inc2) => new Date(inc2.date_time) - new Date(inc1.date_time));
-            results.filter((incident) => {
-                return this.isInBounds(this.leaflet.neighborhood_markers[incident.neighborhood_number-1].location[0], this.leaflet.neighborhood_markers[incident.neighborhood_number-1].location[1], this.currentBoundingBox);
-            
+            const visibleNeighborhoods = Object.values(this.neighborhoods).filter((each) => this.isInBounds(each.loc[0], each.loc[1], this.leaflet.map.getBounds())).map((each) => each.name);
+            this.incidents = results.filter((incident) => {
+                return visibleNeighborhoods.includes(this.neighborhoods[incident.neighborhood_number].name);
             });
-            this.incidents = results;
-            console.log(results);
         }).catch((error) => {
             console.log('Error', error);
         });
@@ -163,6 +176,16 @@ export default {
         this.leaflet.map.on('zoomend', this.onInteract);
         this.leaflet.map.on('moveend', this.onInteract);
 
+        //Fix leaflet error when zoom after close popup in lightning component
+        L.Popup.prototype._animateZoom = function (e) {
+            if (!this._map) {
+                return
+            }
+            var pos = this._map._latLngToNewLayerPoint(this._latlng, e.zoom, e.center),
+                anchor = this._getAnchor()
+            L.DomUtil.setPosition(this._container, pos.add(anchor))
+        }
+
         let district_boundary = new L.geoJson();
         district_boundary.addTo(this.leaflet.map);
 
@@ -175,20 +198,19 @@ export default {
             console.log('Error:', error);
         });
         
-        this.leaflet.neighborhood_markers.forEach((neighborhood) => {
-            neighborhood.marker = L.marker(neighborhood.location).addTo(this.leaflet.map);
-            neighborhood.marker._icon.classList.add("huechange");
-        })
-
         this.getJSON('http://localhost:8000/incidents').then((results) => {
             // crime data
             results.sort((inc1,inc2) => new Date(inc2.date_time) - new Date(inc1.date_time));
-            results.filter((incident) => {
-                return this.isInBoundingBox(this.leaflet.neighborhood_markers[incident.neighborhood_number-1].location[0], this.leaflet.neighborhood_markers[incident.neighborhood_number-1].location[1]);
-            
-            });
             this.incidents = results;
-            console.log(results);
+            const crimesByNeighborhood = this.incidents.reduce((total, value) => {
+                total[this.neighborhoods[value.neighborhood_number].name] = (total[this.neighborhoods[value.neighborhood_number].name] || 0) + 1;
+                return total;
+            }, {});
+            console.log(crimesByNeighborhood);
+            this.leaflet.neighborhood_markers.forEach((neighborhood) => {
+                neighborhood.marker = L.marker(neighborhood.location).bindPopup(`<h2>${crimesByNeighborhood[neighborhood.neighborhood_name]}</h2>`).openPopup().addTo(this.leaflet.map);
+                neighborhood.marker._icon.classList.add("huechange");
+            });
         }).catch((error) => {
             console.log('Error', error);
         });
@@ -230,23 +252,29 @@ export default {
             </div>
         </div>
     </div>
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Neighborhood</th>
-                <th>Incident Type</th>
-            </tr>
-        </thead>
-        <tbody>
-            
-            <tr v-for="(item, index) in incidents">
-                <td>{{ index + 1 }}</td>
-                <td>{{ neighborhoods[item.neighborhood_number] }}</td>
-                <td>{{ item.incident}}</td>
-            </tr>
-        </tbody>
-    </table>
+    <div v-show="view === 'map'">
+        <div class="grid-container">
+            <div class="grid-x grid-padding-x">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Neighborhood</th>
+                            <th>Incident Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr v-for="(item, index) in incidents">
+                            <td>{{ index + 1 }}</td>
+                            <td>{{ neighborhoods[item.neighborhood_number].name }}</td>
+                            <td>{{ item.incident}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <div v-if="view === 'new_incident'">
         <!-- Replace this with your actual form: can be done here or by making a new component -->
         <div class="grid-container">
