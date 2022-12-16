@@ -174,16 +174,11 @@ export default {
         }).catch((error) => {
             console.log('Error:', error);
         });
-<<<<<<< HEAD
         
         this.leaflet.neighborhood_markers.forEach((neighborhood) => {
             neighborhood.marker = L.marker(neighborhood.location).addTo(this.leaflet.map);
             neighborhood.marker._icon.classList.add("huechange");
         })
-
-        $(".leaflet-pane.leaflet-shadow-pane").remove();
-
-=======
 
         this.getJSON('http://localhost:8000/incidents').then((results) => {
             // crime data
@@ -197,7 +192,8 @@ export default {
         }).catch((error) => {
             console.log('Error', error);
         });
->>>>>>> origin/chris
+
+        $(".leaflet-pane.leaflet-shadow-pane").remove();
     }
 }
 </script>
