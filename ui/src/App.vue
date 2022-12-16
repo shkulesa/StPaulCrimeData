@@ -39,7 +39,10 @@ export default {
                     {location: [44.937705, -93.136997], marker: null},
                     {location: [44.949203, -93.093739], marker: null}
                 ]
-            }
+            },
+            currentAddress: '',
+            currentMarker: null,
+            inputError: false,
         };
     },
     methods: {
@@ -69,7 +72,6 @@ export default {
                 });
             });
         },
-
         uploadJSON(method, url, data) {
             return new Promise((resolve, reject) => {
                 $.ajax({
@@ -86,16 +88,57 @@ export default {
                     }
                 });
             });
+        },
+        clearMarkers() {
+            $(".leaflet-marker-icon").remove(); 
+            $(".leaflet-popup").remove();
+            $(".leaflet-pane.leaflet-shadow-pane").remove();
+        },
+        isInBoundingBox(lat, lon, x1, x2, y1, y2) {
+            return lat >= x1 && lat <= x2 && lon >= y1 && lon <= y2;
+        },
+        onInput(e) {
+            this.currentAddress = e.target.value;
+        },
+        onSubmit() {
+            this.inputError = false;
+            this.getJSON(`https://nominatim.openstreetmap.org/search?q=${encodeURI(this.currentAddress)}&format=json`).then((result) => {
+                const {lat, lon} = result[0];
+                if(this.isInBoundingBox(lat, lon, this.leaflet.bounds.se.lat, this.leaflet.bounds.nw.lat, this.leaflet.bounds.nw.lng, this.leaflet.bounds.se.lng)) {
+                    this.clearMarkers();
+                    this.currentMarker = L.marker([lat, lon]).addTo(this.leaflet.map);
+                    this.leaflet.map.panTo([lat, lon]);
+                } else {
+                    this.inputError = true;
+                }
+            }).catch((error) => {
+                console.log(error);
+            })
+        },
+        onInteract() {
+            this.inputError = false;
+            const currentCenter = this.leaflet.map.getCenter().lat + ',' + this.leaflet.map.getCenter().lng;
+            this.getJSON('https://nominatim.openstreetmap.org/search?q=' + currentCenter + '&format=json').then((result) => {
+                this.currentAddress = result[0].display_name;
+            }).catch((error) => {
+                console.log(error);
+            });
         }
     },
     mounted() {
         this.leaflet.map = L.map('leafletmap').setView([this.leaflet.center.lat, this.leaflet.center.lng], this.leaflet.zoom);
+
+        this.currentMarker = L.marker([this.leaflet.center.lat, this.leaflet.center.lng]).addTo(this.leaflet.map);
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             minZoom: 11,
             maxZoom: 18
         }).addTo(this.leaflet.map);
         this.leaflet.map.setMaxBounds([[44.883658, -93.217977], [45.008206, -92.993787]]);
+
+        this.leaflet.map.on('zoomend', this.onInteract);
+        this.leaflet.map.on('moveend', this.onInteract);
 
         let district_boundary = new L.geoJson();
         district_boundary.addTo(this.leaflet.map);
@@ -118,6 +161,23 @@ export default {
             <p :class="'cell small-4 ' + ((view === 'map') ? 'selected' : 'unselected')" @click="viewMap">Map</p>
             <p :class="'cell small-4 ' + ((view === 'new_incident') ? 'selected' : 'unselected')" @click="viewNewIncident">New Incident</p>
             <p :class="'cell small-4 ' + ((view === 'about') ? 'selected' : 'unselected')" @click="viewAbout">About</p>
+        </div>
+    </div>
+    <div v-show="view === 'map'">
+        <div class="grid-container">
+            <div class="grid-x grid-padding-x">
+                <form @submit.prevent="onSubmit" class="cell auto" style="padding: 0;" data-abide>
+                    <div v-show="inputError === true" data-abide-error class="alert callout" aria-live="assertive" role="alert" style="display: block;">
+                        <p><i class="fi-alert"></i>Location is either invalid or not in bound.</p>
+                    </div>
+                    <div class="input-group">
+                    <input :value="currentAddress" @input="onInput" class="input-group-field" type="text" placeholder="Search by Location">
+                    <div class="input-group-button">
+                        <input type="submit" class="button" value="Go">
+                    </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     <div v-show="view === 'map'">
