@@ -206,7 +206,6 @@ export default {
                 total[this.neighborhoods[value.neighborhood_number].name] = (total[this.neighborhoods[value.neighborhood_number].name] || 0) + 1;
                 return total;
             }, {});
-            console.log(crimesByNeighborhood);
             this.leaflet.neighborhood_markers.forEach((neighborhood) => {
                 neighborhood.marker = L.marker(neighborhood.location).bindPopup(`<h2>${crimesByNeighborhood[neighborhood.neighborhood_name]}</h2>`).openPopup().addTo(this.leaflet.map);
                 neighborhood.marker._icon.classList.add("huechange");
@@ -261,6 +260,7 @@ export default {
                             <th>#</th>
                             <th>Neighborhood</th>
                             <th>Incident Type</th>
+                            <th>Time</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -268,7 +268,8 @@ export default {
                         <tr v-for="(item, index) in incidents">
                             <td>{{ index + 1 }}</td>
                             <td>{{ neighborhoods[item.neighborhood_number].name }}</td>
-                            <td>{{ item.incident}}</td>
+                            <td>{{ item.incident }}</td>
+                            <td>{{ item.date_time }}</td>
                         </tr>
                     </tbody>
                 </table>
