@@ -116,6 +116,13 @@ app.get('/incidents', (req, res) => {
     if(Object.entries(req.query).length == 0) {
         databaseSelect(query)
             .then((rows) => {
+                //separate date and time
+                for(let i = 0; i < rows.length; i++) {
+                    let split = rows[i].date_time.split('T');
+                    rows[i].date = split[0];
+                    rows[i].time = split[1];
+                    delete rows[i].date_time;
+                }
                 res.status(200).type('json').send(rows);
             })
             .catch((err) => {
@@ -225,6 +232,12 @@ app.get('/incidents', (req, res) => {
             .then((rows) => {
                 // console.log(rows);
                 // console.log(query);
+                for(let i = 0; i < rows.length; i++) {
+                    let split = rows[i].date_time.split('T');
+                    rows[i].date = split[0];
+                    rows[i].time = split[1];
+                    delete rows[i].date_time;
+                }
                 res.status(200).type('json').send(rows); 
             })
             .catch((err) => {
