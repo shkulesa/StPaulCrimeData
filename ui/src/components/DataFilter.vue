@@ -29,26 +29,27 @@
             <h6>Timespan:</h6>
                 <div class="grid-x">
                     <div class="small-3 filterDateTime">
-                        Start: <input type="date" v-model="settings.start_date">
+                        Start: <input type="date" @change="showStartTime" v-model="settings.start_date">
                     </div>
                     <div class="small-3 filterDateTime">
-                        End: <input type="date" v-model="settings.end_date">
+                        End: <input type="date" @change="showEndTime" v-model="settings.end_date">
                     </div>
                 </div>
                 <div class="grid-x">
-                    <div class="small-3 filterDateTime">
+                    <div v-if="show_start_time" class="small-3 filterDateTime">
                         <input type="time" v-model="settings.start_time">
                     </div>
-                    <div class="small-3 filterDateTime">
+                    <div v-if="show_end_time" class="small-3 filterDateTime">
                         <input type="time" v-model="settings.end_time">
                     </div>
                 </div>
              <h6>Number of Incidents:</h6>
              <div class="grid-x">
                 <div class="small-2">
-                    <input type="number" min="1" max="10000" v-model="limit">  
+                    <input type="number" min="1" v-model="settings.limit">  
                 </div>
             </div>
+            <button type="button" class="button" @click="applyFilters">Apply Filters</button>
         </form>
         DELETE AFTER TESTING<br/>
         Types: {{settings.types}}<br/>
@@ -74,8 +75,8 @@ export default {
                 neighborhoods: [],
                 start_date: "",
                 end_date: "",
-                start_time: "",
-                end_time: "",
+                start_time: "00:00",
+                end_time: "23:59",
                 limit: ""
             },
             neighborhoods: {1:'Conway/Battlecreek/Highwood', 2:'Greater East Side', 3:'West Side', 4:'Daytons Bluff', 5:'Payne/Phalen',6:'North End',7:'Thomas/Dale(Frogtown)', 8:'Summit/University', 9:'West Seventh', 10:'Como', 11:'Hamline/Midway', 12:'St. Anthony', 13:'Union Park', 14:'Macalester-Groveland', 15:'Highland', 16:'Summit Hill', 17:'Capitol River'},
@@ -91,8 +92,115 @@ export default {
                 "Vandalism": [1400, 1401, 1410, 1415, 1416, 1420, 1425, 1426, 1430, 1435, 1436],
                 "Narcotics": [1800, 1810, 1811, 1812, 1813, 1814, 1815, 1820, 1822, 1823, 1824, 1825, 1830, 1835, 1840, 1841, 1842, 1843, 1844, 1845, 1850, 1855, 1860, 1865, 1870, 1880, 1885],
                 "Other": [2619, 3100, 9954, 9959, 9986]
-            }
+            },
+            show_start_time: false,
+            show_end_time: false
         }
+    },
+    methods: {
+        showStartTime() {
+            this.show_start_time = true;
+        },
+        showEndTime() {
+            this.show_end_time = true;
+        },
+        applyFilters() {
+            console.log("times: " + this.settings.start_time + ", " + this.settings.end_time);
+            let time = false;
+            if(this.settings.start_time != undefined || this.settings.end_time != undefined) time = true;
+            let url = this.generateURL();
+            if(time) {
+                (console.log("time filter"));
+                // this.filterTime(this.$parent.getJSON(results, this.start_time, this.end_time));
+                let test;
+                this.$parent.getJSON(url)
+                .then((results) => {
+                    test = results;
+                    console.log(test);
+                });
+            } else {
+                console.log("no time filter");
+                this.$parent.getJSON(url)
+                .then((results) => {
+                    test = results;
+                    console.log(test);
+                });
+            }
+            
+        },
+        generateURL() {
+            let url = "http://localhost:8000/incidents?";
+            let firstParam = true;
+            // console.log("type: " + this.settings.types);
+            for(let i = 0; i < this.settings.types.length; i++) {
+                // console.log("i loop: " + this.settings.types[i]);
+                if(i == 0) {
+                    url += "code=";
+                    firstParam = false;
+                }
+                for(let j = 0; j < this.type_groups[this.settings.types[i]].length; j++) {
+                    // console.log("j-loop: " + this.type_groups[this.settings.types[i]]);
+                    if(i != 0 || j != 0) url += ",";
+                    url += this.type_groups[this.settings.types[i]][j];
+                    // console.log("add: " + this.type_groups[this.settings.types[i]][j]);
+                }
+            }
+            for(let i = 0; i < this.settings.neighborhoods.length; i++) {
+                if(i == 0) {
+                    if(firstParam) {
+                        url += "neighborhood_number=" + this.settings.neighborhoods[i];
+                        firstParam = false;
+                    } else {
+                        url += "&neighborhood_number=" + this.settings.neighborhoods[i];
+                    }
+                } else {
+                    url += "," + this.settings.neighborhoods[i];
+                }
+            }
+            // if(start_time == undefined) start_time = "00:00";
+            // if(end_time == undefined) end_time = "23:59";
+            this.settings.start_time += ":00";
+            this.settings.end_time += ":59";
+            // let start = "";
+            if(this.settings.start_date != undefined && this.settings.start_date != "") {
+                let start = "";
+                if(!firstParam) {
+                    start = "&";
+                }
+                start += "start_date=" + this.settings.start_date + "T" + this.settings.start_time;
+                url += start;
+                firstParam = false;
+            }
+            if(this.settings.end_date != undefined && this.settings.end_date != "") {
+                let end = "";
+                if(!firstParam) {
+                    end = "&";
+                }
+                end += "end_date=" + this.settings.end_date + "T" + this.settings.end_time;
+                url += end;
+                firstParam = false;
+            }
+            if(this.settings.limit != undefined || this.settings.limit != "" ){
+                if(!firstParam) {
+                    url += "&";
+                }
+                url += "limit="  + this.settings.limit;
+            }
+            
+
+
+
+            console.log('URL:' + url);
+            //if no filters
+            if(url.charAt(url.length-1) == '?') url = url.substring(0,url.length-2);
+            return url;
+        },
+        filterTime(results, start, end) {
+                
+        }
+    },
+    props: {
+        result_array: Array
     }
 }
 </script>

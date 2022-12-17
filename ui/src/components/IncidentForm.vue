@@ -15,7 +15,7 @@
                     neighborhood_number: "",
                     block: ""
                 },
-                nextCaseNumber: 22094836,
+                nextCaseNumber: 22900000,
                 types: {
                     "100":"HOMICIDE",
                     "110":"Murder, Non Negligent Manslaughter",

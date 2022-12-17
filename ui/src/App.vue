@@ -203,7 +203,7 @@ export default {
         
         this.getJSON('http://localhost:8000/incidents').then((results) => {
             // crime data
-            results.sort((inc1,inc2) => new Date(inc2.date_time) - new Date(inc1.date_time));
+            // results.sort((inc1,inc2) => new Date(inc2.date_time) - new Date(inc1.date_time));
             this.incidents = results;
             const crimesByNeighborhood = this.incidents.reduce((total, value) => {
                 total[this.neighborhoods[value.neighborhood_number].name] = (total[this.neighborhoods[value.neighborhood_number].name] || 0) + 1;
@@ -274,7 +274,7 @@ export default {
                     <tbody>
                         
                         <tr v-for="(item, index) in incidents">
-                            <td>{{ index + 1 }}</td>
+                            <td>{{ item.case_number }}</td>
                             <td>{{ neighborhoods[item.neighborhood_number].name }}</td>
                             <td>{{ item.incident}}</td>
                         </tr>
