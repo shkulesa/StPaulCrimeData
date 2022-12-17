@@ -9,7 +9,25 @@ export default {
         return {
             view: 'map',
             codes: [],
-            neighborhoods: [],
+            neighborhoods: {
+                1: {name: 'Conway/Battlecreek/Highwood', loc: [44.942068, -93.020521]},
+                2: {name: 'Greater East Side', loc: [44.977413, -93.025156]},
+                3: {name: 'West Side', loc: [44.931244, -93.079578]},
+                4: {name: 'Daytons Bluff', loc: [44.956192, -93.060189]},
+                5: {name: 'Payne/Phalen', loc: [44.978883, -93.068163]},
+                6: {name: 'North End', loc: [44.975766, -93.113887]},
+                7: {name: 'Thomas/Dale(Frogtown)', loc: [44.959639, -93.121271]},
+                8: {name: 'Summit/University', loc: [44.947700, -93.128505]},
+                9: {name: 'West Seventh', loc: [44.930276, -93.119911]},
+                10: {name: 'Como', loc: [44.982752, -93.147910]},
+                11: {name: 'Hamline/Midway', loc: [44.963631, -93.167548]},
+                12: {name: 'St. Anthony', loc: [44.973971, -93.197965]},
+                13: {name: 'Union Park', loc: [44.949043, -93.178261]},
+                14: {name: 'Macalester-Groveland', loc: [44.934848, -93.176736]},
+                15: {name: 'Highland', loc: [44.913106, -93.170779]},
+                16: {name: 'Summit Hill', loc:[44.937705, -93.136997]},
+                17: {name: 'Capitol River', loc:[44.949203, -93.093739]}
+            },
             incidents: [],
             leaflet: {
                 map: null,
@@ -24,28 +42,29 @@ export default {
                     se: {lat: 44.883658, lng: -92.993787}
                 },
                 neighborhood_markers: [
-                    {location: [44.942068, -93.020521], marker: null},
-                    {location: [44.977413, -93.025156], marker: null},
-                    {location: [44.931244, -93.079578], marker: null},
-                    {location: [44.956192, -93.060189], marker: null},
-                    {location: [44.978883, -93.068163], marker: null},
-                    {location: [44.975766, -93.113887], marker: null},
-                    {location: [44.959639, -93.121271], marker: null},
-                    {location: [44.947700, -93.128505], marker: null},
-                    {location: [44.930276, -93.119911], marker: null},
-                    {location: [44.982752, -93.147910], marker: null},
-                    {location: [44.963631, -93.167548], marker: null},
-                    {location: [44.973971, -93.197965], marker: null},
-                    {location: [44.949043, -93.178261], marker: null},
-                    {location: [44.934848, -93.176736], marker: null},
-                    {location: [44.913106, -93.170779], marker: null},
-                    {location: [44.937705, -93.136997], marker: null},
-                    {location: [44.949203, -93.093739], marker: null}
+                    {location: [44.942068, -93.020521], marker: null, neighborhood_name:'Conway/Battlecreek/Highwood'},
+                    {location: [44.977413, -93.025156], marker: null, neighborhood_name:'Greater East Side'},
+                    {location: [44.931244, -93.079578], marker: null, neighborhood_name:'West Side'},
+                    {location: [44.956192, -93.060189], marker: null, neighborhood_name:'Daytons Bluff'},
+                    {location: [44.978883, -93.068163], marker: null, neighborhood_name:'Payne/Phalen'},
+                    {location: [44.975766, -93.113887], marker: null, neighborhood_name:'North End'},
+                    {location: [44.959639, -93.121271], marker: null, neighborhood_name:'Thomas/Dale(Frogtown)'},
+                    {location: [44.947700, -93.128505], marker: null, neighborhood_name:'Summit/University'},
+                    {location: [44.930276, -93.119911], marker: null, neighborhood_name:'West Seventh'},
+                    {location: [44.982752, -93.147910], marker: null, neighborhood_name:'Como'},
+                    {location: [44.963631, -93.167548], marker: null, neighborhood_name:'Hamline/Midway'},
+                    {location: [44.973971, -93.197965], marker: null, neighborhood_name:'St. Anthony'},
+                    {location: [44.949043, -93.178261], marker: null, neighborhood_name:'Union Park'},
+                    {location: [44.934848, -93.176736], marker: null, neighborhood_name:'Macalester-Groveland'},
+                    {location: [44.913106, -93.170779], marker: null, neighborhood_name:'Highland'},
+                    {location: [44.937705, -93.136997], marker: null, neighborhood_name:'Summit Hill'},
+                    {location: [44.949203, -93.093739], marker: null, neighborhood_name:'Capitol River'}
                 ]
             },
             currentAddress: '',
             currentMarker: null,
             inputError: false,
+            currentBoundingBox: {},
         };
     },
     methods: {
@@ -93,12 +112,20 @@ export default {
             });
         },
         clearMarkers() {
-            $(".leaflet-marker-icon").remove(); 
+            $('.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive:not(".huechange")').remove();
             $(".leaflet-popup").remove();
-            $(".leaflet-pane.leaflet-shadow-pane").remove();
+            // $(".leaflet-pane.leaflet-shadow-pane").remove();
         },
-        isInBoundingBox(lat, lon, x1, x2, y1, y2) {
-            return lat >= x1 && lat <= x2 && lon >= y1 && lon <= y2;
+        isInBoundingBox(lat, lon) {
+            return lat >= this.leaflet.bounds.se.lat && lat <= this.leaflet.bounds.nw.lat && lon >= this.leaflet.bounds.nw.lng && lon <= this.leaflet.bounds.se.lng;
+        },
+        isInBounds(lat, lon, currentBounds) {
+            var ne = currentBounds._northEast;
+            var sw = currentBounds._southWest;
+            return lat >= sw.lat && lat <= ne.lat && lon >= sw.lng && lon <= ne.lng;
+        },
+        isNeighborhoodVisible() {
+            
         },
         onInput(e) {
             this.currentAddress = e.target.value;
@@ -107,7 +134,7 @@ export default {
             this.inputError = false;
             this.getJSON(`https://nominatim.openstreetmap.org/search?q=${encodeURI(this.currentAddress)}&format=json`).then((result) => {
                 const {lat, lon} = result[0];
-                if(this.isInBoundingBox(lat, lon, this.leaflet.bounds.se.lat, this.leaflet.bounds.nw.lat, this.leaflet.bounds.nw.lng, this.leaflet.bounds.se.lng)) {
+                if(this.isInBoundingBox(lat, lon)) {
                     this.clearMarkers();
                     this.currentMarker = L.marker([lat, lon]).addTo(this.leaflet.map);
                     this.leaflet.map.panTo([lat, lon]);
@@ -126,6 +153,15 @@ export default {
             }).catch((error) => {
                 console.log(error);
             });
+            this.getJSON('http://localhost:8000/incidents').then((results) => {
+            results.sort((inc1,inc2) => new Date(inc2.date_time) - new Date(inc1.date_time));
+            const visibleNeighborhoods = Object.values(this.neighborhoods).filter((each) => this.isInBounds(each.loc[0], each.loc[1], this.leaflet.map.getBounds())).map((each) => each.name);
+            this.incidents = results.filter((incident) => {
+                return visibleNeighborhoods.includes(this.neighborhoods[incident.neighborhood_number].name);
+            });
+        }).catch((error) => {
+            console.log('Error', error);
+        });
         }
     },
     mounted() {
@@ -143,6 +179,16 @@ export default {
         this.leaflet.map.on('zoomend', this.onInteract);
         this.leaflet.map.on('moveend', this.onInteract);
 
+        //Fix leaflet error when zoom after close popup in lightning component
+        L.Popup.prototype._animateZoom = function (e) {
+            if (!this._map) {
+                return
+            }
+            var pos = this._map._latLngToNewLayerPoint(this._latlng, e.zoom, e.center),
+                anchor = this._getAnchor()
+            L.DomUtil.setPosition(this._container, pos.add(anchor))
+        }
+
         let district_boundary = new L.geoJson();
         district_boundary.addTo(this.leaflet.map);
 
@@ -154,6 +200,25 @@ export default {
         }).catch((error) => {
             console.log('Error:', error);
         });
+        
+        this.getJSON('http://localhost:8000/incidents').then((results) => {
+            // crime data
+            results.sort((inc1,inc2) => new Date(inc2.date_time) - new Date(inc1.date_time));
+            this.incidents = results;
+            const crimesByNeighborhood = this.incidents.reduce((total, value) => {
+                total[this.neighborhoods[value.neighborhood_number].name] = (total[this.neighborhoods[value.neighborhood_number].name] || 0) + 1;
+                return total;
+            }, {});
+            console.log(crimesByNeighborhood);
+            this.leaflet.neighborhood_markers.forEach((neighborhood) => {
+                neighborhood.marker = L.marker(neighborhood.location).bindPopup(`<h2>${crimesByNeighborhood[neighborhood.neighborhood_name]}</h2>`).openPopup().addTo(this.leaflet.map);
+                neighborhood.marker._icon.classList.add("huechange");
+            });
+        }).catch((error) => {
+            console.log('Error', error);
+        });
+
+        $(".leaflet-pane.leaflet-shadow-pane").remove();
     }
 }
 </script>
@@ -195,6 +260,29 @@ export default {
             </div>
         </div>
     </div>
+    <div v-show="view === 'map'">
+        <div class="grid-container">
+            <div class="grid-x grid-padding-x">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Neighborhood</th>
+                            <th>Incident Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                        <tr v-for="(item, index) in incidents">
+                            <td>{{ index + 1 }}</td>
+                            <td>{{ neighborhoods[item.neighborhood_number].name }}</td>
+                            <td>{{ item.incident}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <div v-if="view === 'new_incident'">
         <!-- Replace this with your actual form: can be done here or by making a new component -->
         <div class="grid-x grid-padding-x">
@@ -232,5 +320,8 @@ export default {
     border: solid 1px white;
     text-align: center;
     cursor: pointer;
+}
+img.huechange { 
+    filter: hue-rotate(120deg); 
 }
 </style>
