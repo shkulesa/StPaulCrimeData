@@ -1,9 +1,10 @@
 <script>
 import $ from 'jquery'
 import IncidentForm from './components/IncidentForm.vue'
+import DataFilter from './components/DataFilter.vue'
 
 export default {
-    components: { IncidentForm },
+    components: { IncidentForm, DataFilter },
     data() {
         return {
             view: 'map',
@@ -188,13 +189,18 @@ export default {
                 <div id="leafletmap" class="cell auto"></div>
             </div>
         </div>
+        <div class="grid-container">
+            <div class="grid-x grid-padding-x">
+                <DataFilter />
+            </div>
+        </div>
     </div>
     <div v-if="view === 'new_incident'">
         <!-- Replace this with your actual form: can be done here or by making a new component -->
         <div class="grid-x grid-padding-x">
             <h1 class="cell auto">Submit a new Incident</h1>
         </div>
-        <IncidentForm />
+        <IncidentForm :sendForm="uploadJSON" />
         <div class="grid-container">
         </div>
     </div>
