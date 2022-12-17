@@ -28,6 +28,7 @@ export default {
                 16: {name: 'Summit Hill', loc:[44.937705, -93.136997]},
                 17: {name: 'Capitol River', loc:[44.949203, -93.093739]}
             },
+            renderIncidents: 0,
             incidents: [],
             leaflet: {
                 map: null,
@@ -162,6 +163,10 @@ export default {
         }).catch((error) => {
             console.log('Error', error);
         });
+        },
+        updateIncidents(results) {
+            this.incidents = results;
+            this.renderIncidents++;
         }
     },
     mounted() {
@@ -261,7 +266,7 @@ export default {
         </div>
     </div>
     <div v-show="view === 'map'">
-        <div class="grid-container">
+        <div class="grid-container" :key="renderIncidents">
             <div class="grid-x grid-padding-x">
                 <table>
                     <thead>
@@ -272,8 +277,7 @@ export default {
                         </tr>
                     </thead>
                     <tbody>
-                        
-                        <tr v-for="(item, index) in incidents">
+                        <tr v-for="item in incidents">
                             <td>{{ item.case_number }}</td>
                             <td>{{ neighborhoods[item.neighborhood_number].name }}</td>
                             <td>{{ item.incident}}</td>

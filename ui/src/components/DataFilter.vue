@@ -4,7 +4,16 @@
     <div class="filter">
       <button class="button" type="button" data-toggle="data-filter">Filter</button>
       <div class="dropdown-pane form cell-auto" id="data-filter" data-dropdown data-auto-focus="true">
-        <h4>Filter results</h4>
+        <div class="grid-x" >
+            <div class="small-10">
+                <h4>Filter results</h4>
+            </div>
+            <div class="small-2">
+                <button class="close-button" aria-label="Dismiss alert" type="button" data-toggle="data-filter">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
         <form>
             <div class="grid-container">
                 <div class="grid-x grid-padding-x">
@@ -43,7 +52,7 @@
                         <input type="time" v-model="settings.end_time">
                     </div>
                 </div>
-             <h6>Number of Incidents:</h6>
+             <h6>Max Incidents:</h6>
              <div class="grid-x">
                 <div class="small-2">
                     <input type="number" min="1" v-model="settings.limit">  
@@ -75,8 +84,8 @@ export default {
                 neighborhoods: [],
                 start_date: "",
                 end_date: "",
-                start_time: "00:00",
-                end_time: "23:59",
+                start_time: "00:00:00",
+                end_time: "23:59:59",
                 limit: ""
             },
             neighborhoods: {1:'Conway/Battlecreek/Highwood', 2:'Greater East Side', 3:'West Side', 4:'Daytons Bluff', 5:'Payne/Phalen',6:'North End',7:'Thomas/Dale(Frogtown)', 8:'Summit/University', 9:'West Seventh', 10:'Como', 11:'Hamline/Midway', 12:'St. Anthony', 13:'Union Park', 14:'Macalester-Groveland', 15:'Highland', 16:'Summit Hill', 17:'Capitol River'},
@@ -106,17 +115,26 @@ export default {
         },
         applyFilters() {
             console.log("times: " + this.settings.start_time + ", " + this.settings.end_time);
-            let time = false;
-            if(this.settings.start_time != undefined || this.settings.end_time != undefined) time = true;
+            if(this.settings.start_time.length < 6) this.settings.start_time += ":00"
+            let time = true;
+            // if(this.settings.start_time == "00:00" && this.settings.end_time == "23:59")time = false;
+            console.log("times: " + this.settings.start_time + ", " + this.settings.end_time);
+            if(this.settings.start_time == "00:00:00" && this.settings.end_time == "23:59:59")time = false;
             let url = this.generateURL();
+            let test;
             if(time) {
                 (console.log("time filter"));
                 // this.filterTime(this.$parent.getJSON(results, this.start_time, this.end_time));
-                let test;
                 this.$parent.getJSON(url)
                 .then((results) => {
-                    test = results;
+                    console.log("prefilter");
+                    console.log(results);
+                    test = this.filterTime(results, this.settings.start_time, this.settings.end_time);
                     console.log(test);
+                    this.$parent.updateIncidents(test);
+                })
+                .catch((err) => {
+                    console.log("Error retrieving data" + err);
                 });
             } else {
                 console.log("no time filter");
@@ -124,6 +142,10 @@ export default {
                 .then((results) => {
                     test = results;
                     console.log(test);
+                    this.$parent.updateIncidents(test);
+                })
+                .catch((err) => {
+                    console.log("Error retrieving data" + err);
                 });
             }
             
@@ -159,8 +181,8 @@ export default {
             }
             // if(start_time == undefined) start_time = "00:00";
             // if(end_time == undefined) end_time = "23:59";
-            this.settings.start_time += ":00";
-            this.settings.end_time += ":59";
+            // if(this.settings.start_time.length < 6)this.settings.start_time += ":00";
+            // if(this.settings.end_time.length < 6)this.settings.end_time += ":59";
             // let start = "";
             if(this.settings.start_date != undefined && this.settings.start_date != "") {
                 let start = "";
@@ -195,12 +217,17 @@ export default {
             if(url.charAt(url.length-1) == '?') url = url.substring(0,url.length-2);
             return url;
         },
-        filterTime(results, start, end) {
-                
+        filterTime(data, start, end) {
+            console.log("filter data. Time: " + data[0].time + ", start: " + start + ", end: " + end);
+            let filtered = [];
+            let idx = 0;
+            for(let i = 0; i < data.length; i++) {
+                if(data[i].time >= start && data[i].time <= end) {
+                    filtered[idx++] = data[i];
+                }
+            }
+            return filtered;
         }
-    },
-    props: {
-        result_array: Array
     }
 }
 </script>
