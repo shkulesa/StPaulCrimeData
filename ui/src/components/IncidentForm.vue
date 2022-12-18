@@ -261,13 +261,13 @@
                 <option v-for="(key, value) in types" :value=value>{{key}}</option>
             </select>
             <label>Date</label>
-            <input incident="date" id="date" v-model="data.date">
+            <input type="date" id="date" v-model="data.date" required>
             <label>Police Grid</label>
-            <input incident="text" id="police_grid" v-model="data.police_grid" placeholder="Enter Police Grid">
+            <input type="text" id="police_grid" v-model="data.police_grid" placeholder="Enter Police Grid" required>
             <label>Neighborhood</label>
-            <input incident="text" id="neighborhood_number" v-model="data.neighborhood_number" placeholder="Enter Neighborhood Number">
+            <input type="number" id="neighborhood_number" min="1" max="17" v-model="data.neighborhood_number" required>
             <label>Address</label>
-            <input incident="text" id="block" v-model="data.block" placeholder="Enter Address">
+            <input type="text" id="block" v-model="data.block" placeholder="Enter Address" required>
             <button incident="button" class="button" @click="sendRequest">Submit</button>
         </form>
     </div>
