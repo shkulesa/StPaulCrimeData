@@ -66,6 +66,7 @@ export default {
             currentMarker: null,
             inputError: false,
             currentBoundingBox: {},
+            currentSelectionMarker: null,
         };
     },
     methods: {
@@ -131,10 +132,14 @@ export default {
         onSubmit() {
             this.inputError = false;
             this.getJSON(`https://nominatim.openstreetmap.org/search?q=${encodeURI(this.currentAddress)}&format=json`).then((result) => {
-                const {lat, lon} = result[0];
-                if(this.isInBoundingBox(lat, lon)) {
-                    this.currentMouseOverMarker = L.marker([lat, lon]).addTo(this.leaflet.map);
-                    this.leaflet.map.panTo([lat, lon]);
+                if(result.length === 0) {
+                    const {lat, lon} = result[0];
+                    if(this.isInBoundingBox(lat, lon)) {
+                        this.currentMarker = L.marker([lat, lon]).addTo(this.leaflet.map);
+                        this.leaflet.map.panTo([lat, lon]);
+                    } else {
+                        this.inputError = true;
+                    }
                 } else {
                     this.inputError = true;
                 }
@@ -171,6 +176,27 @@ export default {
                 console.log(error);
             })
         },
+        displayMarker(block) {
+            block = block.split(' ');
+            block[0] = block[0].replaceAll('X', '0');
+            block = block.join(' ') + ', Saint Paul, Minnesota, US';
+            this.getJSON(`https://nominatim.openstreetmap.org/search?q=${encodeURI(block)}&format=json`).then((result) => {
+                if(result.length === 0) {
+                    const {lat, lon} = result[0];
+                    if(this.isInBoundingBox(lat, lon)) {
+                        this.currentSelectionMarker = L.marker([lat, lon]).addTo(this.leaflet.map);
+                        this.currentSelectionMarker._icon.classList.add("huechange1");
+                        this.leaflet.map.panTo([lat, lon]);
+                    } else {
+                        this.inputError = true;
+                    }
+                } else {
+                    this.inputError = true;
+                }
+            }).catch((error) => {
+                console.log(error);
+            })
+        }
     },
     mounted() {
         this.leaflet.map = L.map('leafletmap').setView([this.leaflet.center.lat, this.leaflet.center.lng], this.leaflet.zoom);
@@ -280,16 +306,20 @@ export default {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr @mouseover="onMouseOver(item)" @mouseout="onMouseOut" v-for="item in incidents">
+                        <tr v-for="item in incidents">
                             <td>{{ item.case_number }}</td>
                             <td>{{ item.incident}}</td>
                             <td>{{ neighborhoods[item.neighborhood_number].name }}</td>
                             <td>{{ item.block }}</td>
                             <td>{{ item.date }}</td>
-                            <td> <button type="button" class="button" @click="displayMarker(item.block)">Show</button></td>
+                            <td> 
+                                <div class="input-group-button">
+                                    <button type="button" class="button" @click="displayMarker(item.block)">Show</button>
+                                </div>
+                            </td>
                             <td>
                                 <div class="input-group-button">
-                                    <button @click="onDelete(item)" class="button">DELETE</button>
+                                    <button @click="onDelete(item)" class="button">Delete</button>
                                 </div>
                             </td>
                         </tr>
@@ -338,5 +368,8 @@ export default {
 }
 img.huechange { 
     filter: hue-rotate(120deg); 
+}
+img.huechange1 { 
+    filter: hue-rotate(230deg); 
 }
 </style>
