@@ -55,17 +55,12 @@
              <h6>Max Incidents:</h6>
              <div class="grid-x">
                 <div class="small-2">
-                    <input type="number" min="1" v-model="settings.limit">  
+                    <input required type="number" min="1" v-model="settings.limit">  
                 </div>
             </div>
             <button type="button" class="button margin-r" @click="applyFilters">Apply Filters</button>
             <button type="button" class="button" @click="resetFilters">Reset Filters</button>
         </form>
-        DELETE AFTER TESTING<br/>
-        Types: {{settings.types}}<br/>
-        Hoods: {{settings.neighborhoods}}<br/>
-        Starting from:  {{settings.start_time}}, {{ settings.start_date }} to {{settings.end_time}}, {{ settings.end_date }}<br/>
-        {{ settings.limit }} incidents
       </div>
     </div>
 </template>

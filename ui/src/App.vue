@@ -125,9 +125,6 @@ export default {
             var sw = currentBounds._southWest;
             return lat >= sw.lat && lat <= ne.lat && lon >= sw.lng && lon <= ne.lng;
         },
-        isNeighborhoodVisible() {
-            
-        },
         onInput(e) {
             this.currentAddress = e.target.value;
         },
@@ -136,8 +133,7 @@ export default {
             this.getJSON(`https://nominatim.openstreetmap.org/search?q=${encodeURI(this.currentAddress)}&format=json`).then((result) => {
                 const {lat, lon} = result[0];
                 if(this.isInBoundingBox(lat, lon)) {
-                    this.clearMarkers();
-                    this.currentMarker = L.marker([lat, lon]).addTo(this.leaflet.map);
+                    this.currentMouseOverMarker = L.marker([lat, lon]).addTo(this.leaflet.map);
                     this.leaflet.map.panTo([lat, lon]);
                 } else {
                     this.inputError = true;
@@ -167,7 +163,14 @@ export default {
         updateIncidents(results) {
             this.incidents = results;
             this.renderIncidents++;
-        }
+        },
+        onDelete(item) {
+            this.uploadJSON('DELETE', 'http://localhost:8000/remove-incident', {'case_number': item.case_number}).then((result) => {
+                this.incidents = this.incidents.filter((incident) => incident.case_number !== item.case_number);
+            }).catch((error) => {
+                console.log(error);
+            })
+        },
     },
     mounted() {
         this.leaflet.map = L.map('leafletmap').setView([this.leaflet.center.lat, this.leaflet.center.lng], this.leaflet.zoom);
@@ -214,7 +217,6 @@ export default {
                 total[this.neighborhoods[value.neighborhood_number].name] = (total[this.neighborhoods[value.neighborhood_number].name] || 0) + 1;
                 return total;
             }, {});
-            console.log(crimesByNeighborhood);
             this.leaflet.neighborhood_markers.forEach((neighborhood) => {
                 neighborhood.marker = L.marker(neighborhood.location).bindPopup(`<h2>${crimesByNeighborhood[neighborhood.neighborhood_name]}</h2>`).openPopup().addTo(this.leaflet.map);
                 neighborhood.marker._icon.classList.add("huechange");
@@ -222,7 +224,6 @@ export default {
         }).catch((error) => {
             console.log('Error', error);
         });
-
         $(".leaflet-pane.leaflet-shadow-pane").remove();
     }
 }
@@ -268,7 +269,7 @@ export default {
     <div v-show="view === 'map'">
         <div class="grid-container" :key="renderIncidents">
             <div class="grid-x grid-padding-x">
-                <table>
+                <table class="hover">
                     <thead>
                         <tr>
                             <th>Case #</th>
@@ -279,13 +280,18 @@ export default {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="item in incidents">
+                        <tr @mouseover="onMouseOver(item)" @mouseout="onMouseOut" v-for="item in incidents">
                             <td>{{ item.case_number }}</td>
                             <td>{{ item.incident}}</td>
                             <td>{{ neighborhoods[item.neighborhood_number].name }}</td>
                             <td>{{ item.block }}</td>
                             <td>{{ item.date }}</td>
                             <td> <button type="button" class="button" @click="displayMarker(item.block)">Show</button></td>
+                            <td>
+                                <div class="input-group-button">
+                                    <button @click="onDelete(item)" class="button">DELETE</button>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
