@@ -2,7 +2,10 @@
     <!-- <div class="grid-container"> -->
     <!-- <div class="x-grid"> -->
     <div class="filter">
+        <div class="cell auto">
       <button class="button" type="button" data-toggle="data-filter">Filter</button>
+      <img class="legend" src="./assets/legend.png" alt="table legend" />
+    </div>
       <div class="dropdown-pane form cell-auto" id="data-filter" data-dropdown data-auto-focus="true">
         <div class="grid-x" >
             <div class="small-10">
@@ -221,6 +224,7 @@ export default {
             for(let i = 0; i < data.length; i++) {
                 if(data[i].time >= start && data[i].time <= end) {
                     filtered[idx++] = data[i];
+                    // console.log(data[i].incident);
                 }
             }
             return filtered;
@@ -251,5 +255,9 @@ export default {
     }
     h6 {
         font-weight: bold;
+    }
+    .legend {
+        position: absolute;
+        right: 5%;
     }
 </style>
