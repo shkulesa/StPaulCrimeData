@@ -15,7 +15,7 @@
                     neighborhood_number: "",
                     block: ""
                 },
-                nextCaseNumber: 22900000,
+                nextCaseNumber: 22900001,
                 types: {
                     "100":"HOMICIDE",
                     "110":"Murder, Non Negligent Manslaughter",
@@ -208,8 +208,26 @@
                     "9954":"Proactive Police Visit",
                     "9959":"Community Engagement Event",
                     "9986":"Proactive Foot Patrol"
+                },
+                neighborhoods: {
+                    1: {name: 'Conway/Battlecreek/Highwood', loc: [44.942068, -93.020521]},
+                    2: {name: 'Greater East Side', loc: [44.977413, -93.025156]},
+                    3: {name: 'West Side', loc: [44.931244, -93.079578]},
+                    4: {name: 'Daytons Bluff', loc: [44.956192, -93.060189]},
+                    5: {name: 'Payne/Phalen', loc: [44.978883, -93.068163]},
+                    6: {name: 'North End', loc: [44.975766, -93.113887]},
+                    7: {name: 'Thomas/Dale(Frogtown)', loc: [44.959639, -93.121271]},
+                    8: {name: 'Summit/University', loc: [44.947700, -93.128505]},
+                    9: {name: 'West Seventh', loc: [44.930276, -93.119911]},
+                    10: {name: 'Como', loc: [44.982752, -93.147910]},
+                    11: {name: 'Hamline/Midway', loc: [44.963631, -93.167548]},
+                    12: {name: 'St. Anthony', loc: [44.973971, -93.197965]},
+                    13: {name: 'Union Park', loc: [44.949043, -93.178261]},
+                    14: {name: 'Macalester-Groveland', loc: [44.934848, -93.176736]},
+                    15: {name: 'Highland', loc: [44.913106, -93.170779]},
+                    16: {name: 'Summit Hill', loc:[44.937705, -93.136997]},
+                    17: {name: 'Capitol River', loc:[44.949203, -93.093739]}
                 }
-                
             }
         },
         methods: {
@@ -222,7 +240,7 @@
             },
             validateRequest() {
                 if(this.data.code == undefined || this.data.date == undefined || this.data.police_grid == undefined || this.data.neighborhood_number == undefined || this.data.block == undefined) {
-                    console.log('code: ' + this.data.code + ' date: ' + this.data.date + ' police_grid: ' + this.data.police_grid + ' neighborhood_number: ' + this.data.neighborhood_number + ' block: ' + this.data.block);
+                    console.log('code: ' + this.data.code + ' date: ' + this.data.date + ' police_grid: ' + this.data.police_grid + ' neighborhood: ' + this.data.neighborhood_number + ' block: ' + this.data.block);
                     return false;
                 }
                 return true;
@@ -230,11 +248,20 @@
             sendRequest() {
                 if (this.validateRequest()) {
                     //send req
-                    this.data.time = new Date().toLocaleTimeString();
+                    this.data.time = new Date().toLocaleTimeString('en-US',{hour12:false});
                     this.data.incident = this.types[this.data.code];
                     this.data.case_number = this.nextCaseNumber;
                     this.incrementCaseNumber();
-                    console.log(this.data);
+                    // console.log(this.data.case_number);
+                    // console.log(this.data.date);
+                    // console.log(this.data.time);
+                    // console.log(this.data.code);
+                    // console.log(this.data.incident);
+                    // console.log(this.data.police_grid);
+                    // console.log(this.data.neighborhood_number);
+                    // console.log(this.data.block);
+                    // console.log(this.data);
+                    // window.alert(this.data);
                     this.sendForm("PUT", "http://localhost:8000/new-incident", this.data)
                     .then((suc) => {
                         console.log("success: " + suc);
@@ -255,9 +282,9 @@
 
 <template>
     <div class="form">
-        <form>
+        <form @submit.prevent="sendRequest">
             <label>Code</label>
-            <select id="code" name="code" v-model="data.code">
+            <select id="code" name="code" v-model="data.code" required>
                 <option v-for="(key, value) in types" :value=value>{{key}}</option>
             </select>
             <label>Date</label>
@@ -265,10 +292,12 @@
             <label>Police Grid</label>
             <input type="text" id="police_grid" v-model="data.police_grid" placeholder="Enter Police Grid" required>
             <label>Neighborhood</label>
-            <input type="number" id="neighborhood_number" min="1" max="17" v-model="data.neighborhood_number" required>
+            <select id="neighborhood_number" name="neighborhood_number" v-model="data.neighborhood_number" required>
+                <option v-for="(key, value) in neighborhoods" :value="value">{{key.name}}</option>
+            </select>
             <label>Address</label>
             <input type="text" id="block" v-model="data.block" placeholder="Enter Address" required>
-            <button incident="button" class="button" @click="sendRequest">Submit</button>
+            <button type="button" class="button" @click="sendRequest">Submit</button>
         </form>
     </div>
 </template>
