@@ -271,16 +271,21 @@ export default {
                 <table>
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Neighborhood</th>
+                            <th>Case #</th>
                             <th>Incident Type</th>
+                            <th>Neighborhood</th>
+                            <th>Block</th>
+                            <th>Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="item in incidents">
                             <td>{{ item.case_number }}</td>
-                            <td>{{ neighborhoods[item.neighborhood_number].name }}</td>
                             <td>{{ item.incident}}</td>
+                            <td>{{ neighborhoods[item.neighborhood_number].name }}</td>
+                            <td>{{ item.block }}</td>
+                            <td>{{ item.date }}</td>
+                            <td> <button type="button" class="button" @click="displayMarker(item.block)">Show</button></td>
                         </tr>
                     </tbody>
                 </table>

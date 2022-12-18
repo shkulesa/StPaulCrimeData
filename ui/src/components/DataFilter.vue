@@ -37,18 +37,18 @@
             </div>
             <h6>Timespan:</h6>
                 <div class="grid-x">
-                    <div class="small-3 filterDateTime">
+                    <div class="small-3 margin-r">
                         Start: <input type="date" @change="showStartTime" v-model="settings.start_date">
                     </div>
-                    <div class="small-3 filterDateTime">
+                    <div class="small-3 margin-r">
                         End: <input type="date" @change="showEndTime" v-model="settings.end_date">
                     </div>
                 </div>
                 <div class="grid-x">
-                    <div v-if="show_start_time" class="small-3 filterDateTime">
+                    <div v-if="show_start_time" class="small-3 margin-r">
                         <input type="time" v-model="settings.start_time">
                     </div>
-                    <div v-if="show_end_time" class="small-3 filterDateTime">
+                    <div v-if="show_end_time" class="small-3 margin-r">
                         <input type="time" v-model="settings.end_time">
                     </div>
                 </div>
@@ -58,7 +58,8 @@
                     <input type="number" min="1" v-model="settings.limit">  
                 </div>
             </div>
-            <button type="button" class="button" @click="applyFilters">Apply Filters</button>
+            <button type="button" class="button margin-r" @click="applyFilters">Apply Filters</button>
+            <button type="button" class="button" @click="resetFilters">Reset Filters</button>
         </form>
         DELETE AFTER TESTING<br/>
         Types: {{settings.types}}<br/>
@@ -170,10 +171,10 @@ export default {
             for(let i = 0; i < this.settings.neighborhoods.length; i++) {
                 if(i == 0) {
                     if(firstParam) {
-                        url += "neighborhood_number=" + this.settings.neighborhoods[i];
+                        url += "neighborhood=" + this.settings.neighborhoods[i];
                         firstParam = false;
                     } else {
-                        url += "&neighborhood_number=" + this.settings.neighborhoods[i];
+                        url += "&neighborhood=" + this.settings.neighborhoods[i];
                     }
                 } else {
                     url += "," + this.settings.neighborhoods[i];
@@ -202,7 +203,8 @@ export default {
                 url += end;
                 firstParam = false;
             }
-            if(this.settings.limit != undefined || this.settings.limit != "" ){
+            // console.log(this.settings.limit);
+            if(this.settings.limit != undefined && this.settings.limit != "" ){
                 if(!firstParam) {
                     url += "&";
                 }
@@ -214,7 +216,7 @@ export default {
 
             console.log('URL:' + url);
             //if no filters
-            if(url.charAt(url.length-1) == '?') url = url.substring(0,url.length-2);
+            if(url.charAt(url.length-1) == '?') url = url.substring(0,url.length-1);
             return url;
         },
         filterTime(data, start, end) {
@@ -227,6 +229,15 @@ export default {
                 }
             }
             return filtered;
+        },
+        resetFilters() {
+            this.settings.types = [],
+            this.settings.neighborhoods = [],
+            this.settings.start_date = "",
+            this.settings.end_date = "",
+            this.settings.start_time = "00:00:00",
+            this.settings.end_time = "23:59:59",
+            this.settings.limit = ""
         }
     }
 }
@@ -240,7 +251,7 @@ export default {
         width: 80%;
         margin: 1rem;
     }
-    .filterDateTime {
+    .margin-r {
         margin-right: 2.5%;
     }
     h6 {
