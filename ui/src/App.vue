@@ -285,6 +285,7 @@ export default {
                             <td>{{ neighborhoods[item.neighborhood_number].name }}</td>
                             <td>{{ item.block }}</td>
                             <td>{{ item.date }}</td>
+                            <td> <button type="button" class="button" @click="displayMarker(item.block)">Show</button></td>
                         </tr>
                     </tbody>
                 </table>
