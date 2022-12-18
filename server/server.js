@@ -267,7 +267,7 @@ app.put('/new-incident', (req, res) => {
                     block
                 } = req.body;
                 var insertQuery = 'INSERT INTO Incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES (?, ?, ?, ?, ?, ?, ?);'
-                databaseRun(insertQuery, [case_number, date + time, code, incident, police_grid, neighborhood_number, block])
+                databaseRun(insertQuery, [case_number, date + 'T' + time, code, incident, police_grid, neighborhood_number, block])
                     .then(() => {
                         res.status(200).type('text').send('Uploaded successfully');
                     })

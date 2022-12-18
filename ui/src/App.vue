@@ -1,7 +1,7 @@
 <script>
 import $ from 'jquery'
 import IncidentForm from './components/IncidentForm.vue'
-import DataFilter from './components/DataFilter.vue'
+import DataFilter from './components/DataFilter/DataFilter.vue'
 
 export default {
     components: { IncidentForm, DataFilter },
@@ -208,7 +208,14 @@ export default {
                 }
             }).catch((error) => {
                 console.log(error);
+                console.log(this.inputError);
             })
+        },
+        getCrimeType(item) {
+            let code = Number.parseInt(item.code);
+            if(code <= 220 || (code >=400 && code <=453) || (code >= 810 && code <= 863)) return "violent";
+            if(code >= 1800) return "other";
+            return "property";
         }
     },
     mounted() {
@@ -310,7 +317,7 @@ export default {
     <div v-show="view === 'map'">
         <div class="grid-container" :key="renderIncidents">
             <div class="grid-x grid-padding-x">
-                <table class="hover">
+                <table class="hover unstriped">
                     <thead>
                         <tr>
                             <th>Case #</th>
@@ -321,7 +328,7 @@ export default {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="item in incidents">
+                        <tr v-for="item in incidents" :class="getCrimeType(item)">
                             <td>{{ item.case_number }}</td>
                             <td>{{ item.incident}}</td>
                             <td>{{ neighborhoods[item.neighborhood_number].name }}</td>
@@ -387,4 +394,16 @@ img.huechange {
 img.huechange1 { 
     filter: hue-rotate(230deg); 
 }
+/* .violent {
+    background-color: lightcoral;
+    border-bottom: 1px solid black; 
+}
+.property {
+    background-color: lightgoldenrodyellow;
+    border-bottom: 1px solid black;
+}
+.other {
+    background-color: lightgreen;
+    border-bottom: 1px solid black;
+} */
 </style>
