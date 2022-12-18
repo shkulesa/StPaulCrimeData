@@ -66,7 +66,7 @@ export default {
             currentMarker: null,
             inputError: false,
             currentBoundingBox: {},
-            currentSelectionMarker: null,
+            markerGroup: null,
         };
     },
     methods: {
@@ -113,11 +113,6 @@ export default {
                 });
             });
         },
-        clearMarkers() {
-            $('.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive:not(".huechange")').remove();
-            $(".leaflet-popup").remove();
-            // $(".leaflet-pane.leaflet-shadow-pane").remove();
-        },
         isInBoundingBox(lat, lon) {
             return lat >= this.leaflet.bounds.se.lat && lat <= this.leaflet.bounds.nw.lat && lon >= this.leaflet.bounds.nw.lng && lon <= this.leaflet.bounds.se.lng;
         },
@@ -130,12 +125,13 @@ export default {
             this.currentAddress = e.target.value;
         },
         onSubmit() {
+            this.leaflet.map.removeLayer(this.currentMarker);
             this.inputError = false;
             this.getJSON(`https://nominatim.openstreetmap.org/search?q=${encodeURI(this.currentAddress)}&format=json`).then((result) => {
-                if(result.length === 0) {
-                    const {lat, lon} = result[0];
+                if(result.length !== 0) {
+                    const {lat, lon, display_name} = result[0];
                     if(this.isInBoundingBox(lat, lon)) {
-                        this.currentMarker = L.marker([lat, lon]).addTo(this.leaflet.map);
+                        this.currentMarker = L.marker([lat, lon]).addTo(this.leaflet.map).bindPopup(`<h4>${display_name}</h4>`);
                         this.leaflet.map.panTo([lat, lon]);
                     } else {
                         this.inputError = true;
@@ -176,16 +172,33 @@ export default {
                 console.log(error);
             })
         },
-        displayMarker(block) {
+        displayMarker(item) {
+            this.inputError = false;    
+            var block = item.block;
             block = block.split(' ');
             block[0] = block[0].replaceAll('X', '0');
             block = block.join(' ') + ', Saint Paul, Minnesota, US';
             this.getJSON(`https://nominatim.openstreetmap.org/search?q=${encodeURI(block)}&format=json`).then((result) => {
-                if(result.length === 0) {
+                if(result.length !== 0) {
                     const {lat, lon} = result[0];
                     if(this.isInBoundingBox(lat, lon)) {
-                        this.currentSelectionMarker = L.marker([lat, lon]).addTo(this.leaflet.map);
-                        this.currentSelectionMarker._icon.classList.add("huechange1");
+                        var currentSelectionMarker = L.marker([lat, lon]).addTo(this.markerGroup);
+                        var popup = document.createElement('div');
+                        popup.innerHTML = `
+                            <p>Incident: ${item.incident}<p>
+                            <p>Date: ${item.date}<p>
+                            <p>Time: ${item.time}<p>
+                        `;
+                        var button = document.createElement('button');
+                        button.innerText = 'Delete';
+                        button.className = 'button';
+                        button.addEventListener('click', () => {
+                            this.markerGroup.removeLayer(currentSelectionMarker);
+                            currentSelectionMarker.remove();
+                        })
+                        popup.appendChild(button);
+                        currentSelectionMarker.bindPopup(popup);
+                        currentSelectionMarker._icon.classList.add("huechange1");
                         this.leaflet.map.panTo([lat, lon]);
                     } else {
                         this.inputError = true;
@@ -212,6 +225,8 @@ export default {
 
         this.leaflet.map.on('zoomend', this.onInteract);
         this.leaflet.map.on('moveend', this.onInteract);
+
+        this.markerGroup = L.layerGroup().addTo(this.leaflet.map);
 
         //Fix leaflet error when zoom after close popup in lightning component
         L.Popup.prototype._animateZoom = function (e) {
@@ -244,7 +259,7 @@ export default {
                 return total;
             }, {});
             this.leaflet.neighborhood_markers.forEach((neighborhood) => {
-                neighborhood.marker = L.marker(neighborhood.location).bindPopup(`<h2>${crimesByNeighborhood[neighborhood.neighborhood_name]}</h2>`).openPopup().addTo(this.leaflet.map);
+                neighborhood.marker = L.marker(neighborhood.location).bindPopup(`<h4>Number of crimes: ${crimesByNeighborhood[neighborhood.neighborhood_name]}</h4>`).openPopup().addTo(this.leaflet.map);
                 neighborhood.marker._icon.classList.add("huechange");
             });
         }).catch((error) => {
@@ -314,7 +329,7 @@ export default {
                             <td>{{ item.date }}</td>
                             <td> 
                                 <div class="input-group-button">
-                                    <button type="button" class="button" @click="displayMarker(item.block)">Show</button>
+                                    <button type="button" class="button" @click="displayMarker(item)">Show</button>
                                 </div>
                             </td>
                             <td>
