@@ -1,6 +1,6 @@
 <template>
     <div class="filter">
-        <div class="cell auto">
+    <div class="cell auto">
       <button class="button" type="button" data-toggle="data-filter">Filter</button>
       <img class="legend" src="./assets/legend.png" alt="table legend" />
     </div>
@@ -231,7 +231,8 @@ export default {
         font-weight: bold;
     }
     .legend {
-        position: absolute;
-        right: 5%;
+        position: relative;
+        clear: right;
+        left: 2 rem;
     }
 </style>

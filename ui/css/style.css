@@ -12,12 +12,6 @@ table.unstriped tbody tr.violent{
     background-color: #e39393;
     border-bottom: 1px solid black; 
 }
-/* tbody tr:nth-child(even) {
-    border-bottom: 1px solid black;
-}
-tbody tr:nth-child(odd) {
-    border-bottom: 1px solid black;
-} */
 table.unstriped tbody tr.property {
     background-color: #f9fcac;
     border-bottom: 1px solid black;

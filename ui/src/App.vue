@@ -450,6 +450,7 @@ export default {
 
             <h2>Demo Video:</h2>
             <div class = "responsive-embed">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/V92aN5nZBtw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 <!--insert video here-->
             </div>
         </div>
