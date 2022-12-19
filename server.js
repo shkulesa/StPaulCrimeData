@@ -16,6 +16,8 @@ let port = 8000;
 app.use(express.json());
 app.use(cors());
 
+app.use(express.static("dist"));
+
 // Open SQLite3 database (in read-only mode)
 let db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
