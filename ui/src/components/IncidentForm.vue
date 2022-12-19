@@ -6,7 +6,7 @@
         data() {
             return {
                 data: {
-                    case_number: 22900010,
+                    case_number: "",
                     date: "",
                     time: "",
                     code: "",
@@ -309,7 +309,7 @@
             </select>
             <label>Address</label>
             <input type="text" id="block" v-model="data.block" placeholder="Enter Address" required>
-            <button type="button" class="button" @click="sendRequest">Submit  <span v-show="success" class="badge success" :key="success">&#10003;</span></button>
+            <button type="submit" class="button">Submit  <span v-show="success" class="badge success" :key="success">&#10003;</span></button>
             
 
         </form>
