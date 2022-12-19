@@ -362,7 +362,95 @@ export default {
         <!-- Replace this with your actual about the project content: can be done here or by making a new component -->
         <div class="grid-container">
             <div class="grid-x grid-padding-x">
-                <h1 class="cell auto">About the Project</h1>
+                <h1 class="cell auto">About the Project:</h1>
+            </div>
+            <h2>Our team...</h2>
+            <div class="grid-x grid-margin-x grid-padding-y small-up-1 medium-up-2">
+                <div class = "cell auto">
+                    <h3>Sam</h3>
+                    <ul> 
+                        <li>Hometown: Minneapolis, MN</li>
+                        <li>Collegiate Year: Senior</li>
+                        <li>Major: Computer Science</li>
+                        <li>Fun fact: I play on the UST Baseball team</li>
+                    </ul>
+                </div>
+                <div class = "cell shrink">
+                    <div class = "responsive-embed(1)">
+                        <img src = "./images/samPic.jpg" alt = "Sam's Picture"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-x grid-margin-x grid-padding-y small-up-1 medium-up-2">
+                <div class = "cell auto">
+                    <h3>Chris</h3>
+                    <ul> 
+                        <li>Hometown: Rogers, MN</li>
+                        <li>Collegiate Year: Junior</li>
+                        <li>Major: Computer Science</li>
+                        <li>Fun fact: I have gone to the Minnesota State Fair every year I have been alive</li>
+                    </ul>
+                </div>
+                <div class = "cell shrink responsive-embed(1)">
+                    <img src = "./images/chrisPic.jpg" alt = "Chris' Picture"/>
+                </div>
+            </div>
+
+            <div class="grid-x grid-margin-x grid-padding-y small-up-1 medium-up-2">
+                <div class = "cell auto">
+                    <h3>Hieu</h3>
+                    <ul> 
+                        <li>Hometown: Danang, Vietnam</li>
+                        <li>Collegiate Year: Senior</li>
+                        <li>Major: Computer Science</li>
+                        <li>Fun fact: I play guitar in my free time</li>
+                    </ul>
+                </div>
+                <div class = "cell shrink responsive-embed(1)">
+                    <img src = "./images/hieuPic.jpeg" alt = "Hieu's Picture"/>
+                </div>
+            </div>
+
+            <h2>What we used...</h2>
+            <h4>APIs:</h4>
+            <ul>
+                <li><a href = "https://leafletjs.com/" target = "_blank">Leaflet</a>: We used Leaflet to render the interactive map and place neighborhood markers on top of it to see crimes of that area.</li>
+                <li><a href = "https://nominatim.org/release-docs/develop/api/Overview/" target = "_blank">Nominatim</a>: We used Nominatim to convert between address and lat/lon.</li>
+                <li>Saint Paul Crime: We built and used our own API which interacts with the data stored in a SQLite3 database, originally downloaded from the public <a href = "https://information.stpaul.gov/datasets/stpaul::crime-incident-report/about" target = "_blank">Saint Paul Crime Incident Report </a>dataset.
+                    We built this API using Node.Js and JQuery.
+                </li>
+            </ul>
+            <h4>Frameworks:</h4>
+            <ul>
+                <li><a href = "https://vuejs.org/" target = "_blank">Vue.js</a>:
+                    We used Vue because it is a lightweight and relatively simple JavaScript framework which is commonly used for single page applications such as ours.
+                    It gave us the ability to create components for data filtering and the incident form and overall made our code simpler and more readable.
+                </li>
+                <li><a href = "https://get.foundation/" target = "_blank">Foundations</a>:
+                    We used Foundations because it is an advanced responsive front-end framework which we are all familar with.
+                    This allows our appliation to be used on any size screen.
+                </li>
+                <li><a href = "https://expressjs.com/" target = "_blank">Express</a>:
+                    We used Express as a back end framework for building our Saint Paul Crime API.
+                </li>
+            </ul>
+
+            <h2>Our findings...</h2>
+            <ul>
+                <li>UST is split between the nieghborhoods Union Park and Macalester-Groveland.
+                    During the previous school year, there was one murder in these neighborhoods (01/11/2022).
+                </li>
+                <li>In these two neighborhoods there were 22 robberies during our last school year.</li>
+                <li>There were 0 reports of arson in any of the Saint Paul neighborhoods during the previous school year.</li>
+                <li>107 out of the 1000 most recent crime incidents have occured in the Capitol River neighborhood (Downtown Saint Paul).</li>
+                <li>4 out of the 10 most recent murders occured in the Payne/Phalen neighborhood.</li>
+                <li>The Como neighborhood had the least crime incidents out of the last 1000 with only 21.</li>
+            </ul>
+
+            <h2>Demo Video:</h2>
+            <div class = "responsive-embed">
+                <!--insert video here-->
             </div>
         </div>
     </div>
