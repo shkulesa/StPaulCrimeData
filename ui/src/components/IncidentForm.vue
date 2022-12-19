@@ -16,7 +16,6 @@
                     block: ""
                 },
                 success: false,
-                // nextCaseNumber: 22900002,
                 types: {
                     "100":"HOMICIDE",
                     "110":"Murder, Non Negligent Manslaughter",
@@ -236,9 +235,6 @@
                 let date = new Date();
                 return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay();
             },
-            // incrementCaseNumber() {
-            //     this.nextCaseNumber++;
-            // },
             validateRequest() {
                 if(this.data.code == undefined || this.data.date == undefined || this.data.police_grid == undefined || this.data.neighborhood_number == undefined || this.data.block == undefined) {
                     console.log('code: ' + this.data.code + ' date: ' + this.data.date + ' police_grid: ' + this.data.police_grid + ' neighborhood: ' + this.data.neighborhood_number + ' block: ' + this.data.block);
@@ -251,18 +247,6 @@
                     //send req
                     this.data.time = new Date().toLocaleTimeString('en-US',{hour12:false});
                     this.data.incident = this.types[this.data.code];
-                    // this.data.case_number = this.nextCaseNumber;
-                    // this.incrementCaseNumber();
-                    // console.log(this.data.case_number);
-                    // console.log(this.data.date);
-                    // console.log(this.data.time);
-                    // console.log(this.data.code);
-                    // console.log(this.data.incident);
-                    // console.log(this.data.police_grid);
-                    // console.log(this.data.neighborhood_number);
-                    // console.log(this.data.block);
-                    // console.log(this.data);
-                    // window.alert(this.data);
                     console.log(this.data);
                     this.sendForm("PUT", "http://localhost:8000/new-incident", this.data)
                     .then((suc) => {
@@ -309,7 +293,7 @@
             </select>
             <label>Address</label>
             <input type="text" id="block" v-model="data.block" placeholder="Enter Address" required>
-            <button type="button" class="button" @click="sendRequest">Submit  <span v-show="success" class="badge success" :key="success">&#10003;</span></button>
+            <button type="button" class="button">Submit  <span v-show="success" class="badge success" :key="success">&#10003;</span></button>
             
 
         </form>

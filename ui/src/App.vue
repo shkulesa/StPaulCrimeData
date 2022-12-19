@@ -259,7 +259,6 @@ export default {
         
         this.getJSON('http://localhost:8000/incidents').then((results) => {
             // crime data
-            // results.sort((inc1,inc2) => new Date(inc2.date_time) - new Date(inc1.date_time));
             this.incidents = results;
             const crimesByNeighborhood = this.incidents.reduce((total, value) => {
                 total[this.neighborhoods[value.neighborhood_number].name] = (total[this.neighborhoods[value.neighborhood_number].name] || 0) + 1;
@@ -394,16 +393,4 @@ img.huechange {
 img.huechange1 { 
     filter: hue-rotate(230deg); 
 }
-/* .violent {
-    background-color: lightcoral;
-    border-bottom: 1px solid black; 
-}
-.property {
-    background-color: lightgoldenrodyellow;
-    border-bottom: 1px solid black;
-}
-.other {
-    background-color: lightgreen;
-    border-bottom: 1px solid black;
-} */
 </style>

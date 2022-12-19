@@ -1,6 +1,4 @@
 <template>
-    <!-- <div class="grid-container"> -->
-    <!-- <div class="x-grid"> -->
     <div class="filter">
         <div class="cell auto">
       <button class="button" type="button" data-toggle="data-filter">Filter</button>
@@ -74,7 +72,6 @@ export default {
         this.data_filter = new Foundation.Dropdown($('#data-filter'), {
             vOffset: 5
         });
-        // this.settings.start_date = this.getDate();
     },
     data() {
         return {
@@ -113,21 +110,14 @@ export default {
             this.show_end_time = true;
         },
         applyFilters() {
-            console.log("times: " + this.settings.start_time + ", " + this.settings.end_time);
-            if(this.settings.start_time.length < 6) this.settings.start_time += ":00"
+            if(this.settings.start_time.length < 6) this.settings.start_time += ":00";
             let time = true;
-            // if(this.settings.start_time == "00:00" && this.settings.end_time == "23:59")time = false;
-            console.log("times: " + this.settings.start_time + ", " + this.settings.end_time);
             if(this.settings.start_time == "00:00:00" && this.settings.end_time == "23:59:59")time = false;
             let url = this.generateURL();
             let test;
             if(time) {
-                (console.log("time filter"));
-                // this.filterTime(this.$parent.getJSON(results, this.start_time, this.end_time));
                 this.$parent.getJSON(url)
                 .then((results) => {
-                    console.log("prefilter");
-                    console.log(results);
                     test = this.filterTime(results, this.settings.start_time, this.settings.end_time);
                     console.log(test);
                     this.$parent.updateIncidents(test);
@@ -152,18 +142,14 @@ export default {
         generateURL() {
             let url = "http://localhost:8000/incidents?";
             let firstParam = true;
-            // console.log("type: " + this.settings.types);
             for(let i = 0; i < this.settings.types.length; i++) {
-                // console.log("i loop: " + this.settings.types[i]);
                 if(i == 0) {
                     url += "code=";
                     firstParam = false;
                 }
                 for(let j = 0; j < this.type_groups[this.settings.types[i]].length; j++) {
-                    // console.log("j-loop: " + this.type_groups[this.settings.types[i]]);
                     if(i != 0 || j != 0) url += ",";
                     url += this.type_groups[this.settings.types[i]][j];
-                    // console.log("add: " + this.type_groups[this.settings.types[i]][j]);
                 }
             }
             for(let i = 0; i < this.settings.neighborhoods.length; i++) {
@@ -178,11 +164,6 @@ export default {
                     url += "," + this.settings.neighborhoods[i];
                 }
             }
-            // if(start_time == undefined) start_time = "00:00";
-            // if(end_time == undefined) end_time = "23:59";
-            // if(this.settings.start_time.length < 6)this.settings.start_time += ":00";
-            // if(this.settings.end_time.length < 6)this.settings.end_time += ":59";
-            // let start = "";
             if(this.settings.start_date != undefined && this.settings.start_date != "") {
                 let start = "";
                 if(!firstParam) {
@@ -201,30 +182,23 @@ export default {
                 url += end;
                 firstParam = false;
             }
-            // console.log(this.settings.limit);
             if(this.settings.limit != undefined && this.settings.limit != "" ){
                 if(!firstParam) {
                     url += "&";
                 }
                 url += "limit="  + this.settings.limit;
             }
-            
-
-
-
-            console.log('URL:' + url);
+            // console.log('URL:' + url);
             //if no filters
             if(url.charAt(url.length-1) == '?') url = url.substring(0,url.length-1);
             return url;
         },
         filterTime(data, start, end) {
-            console.log("filter data. Time: " + data[0].time + ", start: " + start + ", end: " + end);
             let filtered = [];
             let idx = 0;
             for(let i = 0; i < data.length; i++) {
                 if(data[i].time >= start && data[i].time <= end) {
                     filtered[idx++] = data[i];
-                    // console.log(data[i].incident);
                 }
             }
             return filtered;
