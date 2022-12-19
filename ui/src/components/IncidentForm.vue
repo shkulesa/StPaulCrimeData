@@ -6,7 +6,7 @@
         data() {
             return {
                 data: {
-                    case_number: "",
+                    case_number: 22900010,
                     date: "",
                     time: "",
                     code: "",
@@ -15,7 +15,8 @@
                     neighborhood_number: "",
                     block: ""
                 },
-                nextCaseNumber: 22900001,
+                success: false,
+                // nextCaseNumber: 22900002,
                 types: {
                     "100":"HOMICIDE",
                     "110":"Murder, Non Negligent Manslaughter",
@@ -235,9 +236,9 @@
                 let date = new Date();
                 return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay();
             },
-            incrementCaseNumber() {
-                this.nextCaseNumber++;
-            },
+            // incrementCaseNumber() {
+            //     this.nextCaseNumber++;
+            // },
             validateRequest() {
                 if(this.data.code == undefined || this.data.date == undefined || this.data.police_grid == undefined || this.data.neighborhood_number == undefined || this.data.block == undefined) {
                     console.log('code: ' + this.data.code + ' date: ' + this.data.date + ' police_grid: ' + this.data.police_grid + ' neighborhood: ' + this.data.neighborhood_number + ' block: ' + this.data.block);
@@ -250,8 +251,8 @@
                     //send req
                     this.data.time = new Date().toLocaleTimeString('en-US',{hour12:false});
                     this.data.incident = this.types[this.data.code];
-                    this.data.case_number = this.nextCaseNumber;
-                    this.incrementCaseNumber();
+                    // this.data.case_number = this.nextCaseNumber;
+                    // this.incrementCaseNumber();
                     // console.log(this.data.case_number);
                     // console.log(this.data.date);
                     // console.log(this.data.time);
@@ -262,17 +263,25 @@
                     // console.log(this.data.block);
                     // console.log(this.data);
                     // window.alert(this.data);
+                    console.log(this.data);
                     this.sendForm("PUT", "http://localhost:8000/new-incident", this.data)
                     .then((suc) => {
+                        this.success = true;
                         console.log("success: " + suc);
                     })
                     .catch((err) => {
                         console.log(err.status + " err: " + err.message);
+                        if(err.status == 500) {
+                            window.alert("Error: case number already exists");
+                        }
                     })
                 } else {
                     console.log("FORM ERR");
                     window.alert("Please fill out the whole form");
                 }
+            },
+            removeBadge() {
+                this.success = false;
             }
         }
     }
@@ -281,8 +290,11 @@
 
 
 <template>
-    <div class="form">
+    <div class="form" @change="removeBadge">
+        <h4 v-show="success" :key="success" class="green-font">Form submitted successfully &#10003;</h4>
         <form @submit.prevent="sendRequest">
+            <label>Case Number</label>
+            <input type="number" v-model="data.case_number" required>
             <label>Code</label>
             <select id="code" name="code" v-model="data.code" required>
                 <option v-for="(key, value) in types" :value=value>{{key}}</option>
@@ -297,7 +309,9 @@
             </select>
             <label>Address</label>
             <input type="text" id="block" v-model="data.block" placeholder="Enter Address" required>
-            <button type="button" class="button" @click="sendRequest">Submit</button>
+            <button type="button" class="button" @click="sendRequest">Submit  <span v-show="success" class="badge success" :key="success">&#10003;</span></button>
+            
+
         </form>
     </div>
 </template>
@@ -305,5 +319,8 @@
 <style>
     .form {
         margin: 3rem;
+    }
+    .green-font {
+        color: lightgreen;
     }
 </style>

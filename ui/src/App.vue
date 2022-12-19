@@ -190,7 +190,7 @@ export default {
                             <p>Time: ${item.time}<p>
                         `;
                         var button = document.createElement('button');
-                        button.innerText = 'Delete';
+                        button.innerText = 'Delete Mark';
                         button.className = 'button';
                         button.addEventListener('click', () => {
                             this.markerGroup.removeLayer(currentSelectionMarker);
